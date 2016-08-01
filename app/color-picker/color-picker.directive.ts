@@ -2,9 +2,6 @@ import {Component, DynamicComponentLoader, Directive, Input, Output, ViewContain
 import {ColorPickerService} from './color-picker.service';
 import {Rgba, Hsla, Hsva, SliderPosition, SliderDimension} from './classes';
 
-const styleUrls: string[] = ['app/color-picker/color-picker.css'];
-const templateUrl: string = 'app/color-picker/color-picker.html';
-
 @Directive({
     selector: '[colorPicker]',
     host: {
@@ -24,6 +21,7 @@ export class ColorPickerDirective implements OnInit {
     @Input('cpCancelButtonText') cpCancelButtonText: string = 'Cancel';
     @Input('cpFallbackColor') cpFallbackColor: string = '#fff';
     @Input('cpHeight') cpHeight: string = '290px';
+    @Input('cpAlpha') cpAlpha: boolean = true;
     private dialog: any;
     private created: boolean;
 
@@ -45,7 +43,7 @@ export class ColorPickerDirective implements OnInit {
             this.dcl.loadNextToLocation(DialogComponent, this.vcRef)
                 .then((res) => {
                     res.instance.setDialog(this, this.el, this.colorPicker, this.cpPosition, this.cpPositionOffset,
-                        this.cpPositionRelativeToArrow, this.cpOutputFormat, this.cpCancelButton, this.cpCancelButtonClass, this.cpCancelButtonText, this.cpHeight);
+                        this.cpPositionRelativeToArrow, this.cpOutputFormat, this.cpCancelButton, this.cpCancelButtonClass, this.cpCancelButtonText, this.cpHeight, this.cpAlpha);
                     this.dialog = res.instance;
                 });
         } else if (this.dialog) {
@@ -143,7 +141,7 @@ export class SliderDirective {
         document.removeEventListener('touchend', this.listenerStop);
     }
 
-    getX(event: any): number {        
+    getX(event: any): number {
         return (event.pageX !== undefined ? event.pageX : event.touches[0].pageX) - this.el.nativeElement.getBoundingClientRect().left - window.pageXOffset;
     }
     getY(event: any): number {
@@ -151,10 +149,13 @@ export class SliderDirective {
     }
 }
 
+declare var __moduleName: string
+
 @Component({
+    moduleId: __moduleName,
     selector: 'color-picker',
-    templateUrl: templateUrl,
-    styleUrls: styleUrls,
+    templateUrl: 'color-picker.html',
+    styleUrls: ['color-picker.css'],
     directives: [SliderDirective, TextDirective]
 })
 export class DialogComponent implements OnInit {
@@ -186,16 +187,18 @@ export class DialogComponent implements OnInit {
     private cpCancelButtonClass: string;
     private cpCancelButtonText: string;
     private cpHeight: number;
+    private cpAlpha: boolean;
 
     private dialogWidth: number = 232;
     private dialogArrowSize: number = 10;
     private dialogArrowOffset: number = 15;
     private arrowTop: number;
+    private actualPosition: string
 
     constructor(private el: ElementRef, private service: ColorPickerService) { }
 
     setDialog(instance: any, elementRef: ElementRef, color: any, cpPosition: string, cpPositionOffset: string,
-        cpPositionRelativeToArrow: boolean, cpOutputFormat: string, cpCancelButton: boolean, cpCancelButtonClass: string, cpCancelButtonText: string, cpHeight: string) {
+        cpPositionRelativeToArrow: boolean, cpOutputFormat: string, cpCancelButton: boolean, cpCancelButtonClass: string, cpCancelButtonText: string, cpHeight: string, cpAlpha: string) {
         this.directiveInstance = instance;
         this.initialColor = color;
         this.directiveElementRef = elementRef;
@@ -209,6 +212,7 @@ export class DialogComponent implements OnInit {
         this.cpCancelButtonClass = cpCancelButtonClass;
         this.cpCancelButtonText = cpCancelButtonText;
         this.cpHeight = parseInt(cpHeight);
+        this.cpAlpha = cpAlpha && true;
     }
 
     setInitialColor(color: any) {
@@ -222,6 +226,8 @@ export class DialogComponent implements OnInit {
         } else {
             this.hsva = new Hsva(0, 1, 1, 1);
         }
+        if (!this.cpAlpha)
+            this.hsva.a = 1
         this.sliderDimMax = new SliderDimension(150, 230, 130, 150);
         this.slider = new SliderPosition(0, 0, 0, 0);
         if (this.cpOutputFormat === 'rgba') {
@@ -239,8 +245,8 @@ export class DialogComponent implements OnInit {
 
     openColorPicker() {
         if (!this.show) {
-            this.setDialogPosition();
             this.show = true;
+            this.setDialogPosition();
             document.addEventListener('mousedown', this.listenerMouseDown);
             window.addEventListener('resize', this.listenerResize);
         }
@@ -260,9 +266,7 @@ export class DialogComponent implements OnInit {
     }
 
     onResize() {
-        if (this.position === 'fixed') {
-            this.setDialogPosition();
-        }
+        this.setDialogPosition();
     }
 
     setDialogPosition() {
@@ -290,19 +294,54 @@ export class DialogComponent implements OnInit {
             this.left = boxDirective.left;
             this.position = 'fixed';
         }
-        if (this.cpPosition === 'left') {
+
+        let rect = this.el.nativeElement.getBoundingClientRect()
+        let top = rect.top
+        let left = rect.left
+        let bottom = top + this.cpHeight
+        let right = left + this.dialogWidth
+
+        this.actualPosition = this.cpPosition
+        if (this.actualPosition != 'top' && this.actualPosition != 'bottom') {
+            if (right + boxDirective.width + this.dialogArrowSize + 20 > window.innerWidth)
+                this.actualPosition = 'left'
+
+            if (left - this.dialogWidth - this.dialogArrowSize - 20 < 0)
+                this.actualPosition = 'right'
+
+            if (right + boxDirective.width + this.dialogArrowSize + 20 > window.innerWidth || left - this.dialogWidth - this.dialogArrowSize - 20 < 0)
+                this.actualPosition = 'top'
+        }
+
+        if (this.actualPosition == 'top' && top - this.cpHeight - this.dialogArrowSize - 20 < 0)
+            this.actualPosition = 'bottom'
+
+        if (this.actualPosition === 'left') {
             this.top += boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset;
             this.left -= this.dialogWidth + this.dialogArrowSize;
-        } else if (this.cpPosition === 'top') {
+            this.arrowTop = 10
+            if (bottom + boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset + 20 > window.innerHeight) {
+                let diff = bottom + boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset + 20 - window.innerHeight
+                this.top -= diff
+                this.arrowTop += diff
+            }
+        } else if (this.actualPosition === 'top') {
             this.top -= this.cpHeight + this.dialogArrowSize;
             this.left += this.cpPositionOffset / 100 * boxDirective.width - this.dialogArrowOffset;
             this.arrowTop = this.cpHeight - 1;
-        } else if (this.cpPosition === 'bottom') {
+        } else if (this.actualPosition === 'bottom') {
             this.top += boxDirective.height + this.dialogArrowSize;
             this.left += this.cpPositionOffset / 100 * boxDirective.width - this.dialogArrowOffset;
+            this.arrowTop = -20
         } else {
             this.top += boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset;
             this.left += boxDirective.width + this.dialogArrowSize;
+            this.arrowTop = 10
+            if (bottom + boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset + 20 > window.innerHeight) {
+                let diff = bottom + boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset + 20 - window.innerHeight
+                this.top -= diff
+                this.arrowTop += diff
+            }
         }
     }
 
@@ -326,7 +365,7 @@ export class DialogComponent implements OnInit {
     }
 
     setAlpha(val: { v: number, rg: number }) {
-        this.hsva.a = val.v / val.rg;
+        this.hsva.a = this.cpAlpha ? val.v / val.rg : 1;
         this.update();
     }
 

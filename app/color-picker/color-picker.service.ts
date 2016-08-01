@@ -93,7 +93,7 @@ export class ColorPickerService {
         var stringParsers = [
             {
                 re: /(rgb)a?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*%?,\s*(\d{1,3})\s*%?(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
-                parse: function(execResult) {
+                parse: function (execResult) {
                     return new Rgba(parseInt(execResult[2]) / 255,
                         parseInt(execResult[3]) / 255,
                         parseInt(execResult[4]) / 255,
@@ -102,7 +102,7 @@ export class ColorPickerService {
             },
             {
                 re: /(hsl)a?\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
-                parse: function(execResult) {
+                parse: function (execResult) {
                     return new Hsla(parseInt(execResult[2]) / 360,
                         parseInt(execResult[3]) / 100,
                         parseInt(execResult[4]) / 100,
@@ -111,7 +111,7 @@ export class ColorPickerService {
             },
             {
                 re: /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})$/,
-                parse: function(execResult) {
+                parse: function (execResult) {
                     return new Rgba(parseInt(execResult[1], 16) / 255,
                         parseInt(execResult[2], 16) / 255,
                         parseInt(execResult[3], 16) / 255,
@@ -120,7 +120,7 @@ export class ColorPickerService {
             },
             {
                 re: /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])$/,
-                parse: function(execResult) {
+                parse: function (execResult) {
                     return new Rgba(parseInt(execResult[1] + execResult[1], 16) / 255,
                         parseInt(execResult[2] + execResult[2], 16) / 255,
                         parseInt(execResult[3] + execResult[3], 16) / 255,
@@ -183,6 +183,79 @@ export class ColorPickerService {
 
     denormalizeRGBA(rgba: Rgba): Rgba {
         return new Rgba(Math.round(rgba.r * 255), Math.round(rgba.g * 255), Math.round(rgba.b * 255), rgba.a);
+    }
+
+    calculateContrast(foreground: Rgba, background: Rgba) {
+
+        if (Math.round(foreground.a * 100) < 100)
+            foreground = this.compositeColors(foreground, background)
+
+        let luminance1 = this.calculateLuminance(foreground) + 0.05
+        let luminance2 = this.calculateLuminance(background) + 0.05
+
+        return Math.max(luminance1, luminance2) / Math.min(luminance1, luminance2)
+    }
+
+    compositeColors(foreground: Rgba, background: Rgba) {
+        let a = this.compositeAlpha(foreground.a, background.a);
+
+        let r = this.compositeComponent(foreground.r, foreground.a, background.r, background.a, a)
+        let g = this.compositeComponent(foreground.g, foreground.a, background.g, background.a, a)
+        let b = this.compositeComponent(foreground.b, foreground.a, background.b, background.a, a)
+
+        return new Rgba(r, g, b, a)
+    }
+
+    compositeAlpha(foregroundAlpha: number, backgroundAlpha: number) {
+        return 1 - (1 - backgroundAlpha) * (1 - foregroundAlpha)
+    }
+
+    compositeComponent(fgC: number, fgA: number, bgC: number, bgA: number, a: number) {
+        if (a == 0) return 0
+        return ((fgC * fgA) + (bgC * bgA * (1 - fgA))) / a
+    }
+
+    calculateLuminance(color: Rgba) {
+        let red = color.r / 255
+        red = red < 0.03928 ? red / 12.92 : Math.pow((red + 0.055) / 1.055, 2.4)
+
+        let green = color.g / 255
+        green = green < 0.03928 ? green / 12.92 : Math.pow((green + 0.055) / 1.055, 2.4)
+
+        let blue = color.b / 255
+        blue = blue < 0.03928 ? blue / 12.92 : Math.pow((blue + 0.055) / 1.055, 2.4)
+
+        return (0.2126 * red) + (0.7152 * green) + (0.0722 * blue)
+    }
+
+    calculateMinimumAlpha(foreground: Rgba, background: Rgba, minContrastRatio: number) {
+        if (Math.round(background.a * 100) < 100)
+            return -1
+
+        let testForeground = new Rgba(foreground.r, foreground.g, foreground.b, 1)
+        let testRatio = this.calculateContrast(testForeground, background);
+        if (testRatio < minContrastRatio)
+            return -1
+
+        let numIterations = 0
+        let minAlpha = 0
+        let maxAlpha = 1
+
+        while (numIterations <= 10 && (maxAlpha - minAlpha) > 0.01) {
+            let testAlpha = (minAlpha + maxAlpha) / 2;
+
+            testForeground = new Rgba(foreground.r, foreground.g, foreground.b, testAlpha)
+            testRatio = this.calculateContrast(testForeground, background)
+
+            if (testRatio < minContrastRatio)
+                minAlpha = testAlpha
+            else
+                maxAlpha = testAlpha
+
+            numIterations++
+        }
+
+        return maxAlpha
     }
 
 }
