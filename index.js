@@ -1,4 +1,4 @@
-System.register(['./app/color-picker/color-picker.service', './app/color-picker/color-picker.directive', './app/color-picker/classes'], function(exports_1, context_1) {
+System.register(['./app/color-picker/color-picker.service', './app/color-picker/color-picker.directive', './app/color-picker/color-picker.class'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     function exportStar_1(m) {
@@ -16,8 +16,8 @@ System.register(['./app/color-picker/color-picker.service', './app/color-picker/
             function (color_picker_directive_1_1) {
                 exportStar_1(color_picker_directive_1_1);
             },
-            function (classes_1_1) {
-                exportStar_1(classes_1_1);
+            function (color_picker_class_1_1) {
+                exportStar_1(color_picker_class_1_1);
             }],
         execute: function() {
         }

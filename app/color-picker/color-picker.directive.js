@@ -1,4 +1,4 @@
-System.register(['@angular/core', './color-picker.service', './classes'], function(exports_1, context_1) {
+System.register(['@angular/core', './color-picker.service', '@angular/platform-browser', './color-picker.class'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, color_picker_service_1, classes_1;
+    var core_1, color_picker_service_1, platform_browser_1, color_picker_class_1;
     var ColorPickerDirective, TextDirective, SliderDirective, DialogComponent;
     return {
         setters:[
@@ -20,8 +20,11 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
             function (color_picker_service_1_1) {
                 color_picker_service_1 = color_picker_service_1_1;
             },
-            function (classes_1_1) {
-                classes_1 = classes_1_1;
+            function (platform_browser_1_1) {
+                platform_browser_1 = platform_browser_1_1;
+            },
+            function (color_picker_class_1_1) {
+                color_picker_class_1 = color_picker_class_1_1;
             }],
         execute: function() {
             ColorPickerDirective = (function () {
@@ -31,24 +34,24 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                     this.el = el;
                     this.service = service;
                     this.colorPickerChange = new core_1.EventEmitter();
-                    this.cpPosition = 'right';
-                    this.cpPositionOffset = '0%';
-                    this.cpPositionRelativeToArrow = false;
-                    this.cpOutputFormat = 'hex';
-                    this.cpCancelButton = false;
-                    this.cpCancelButtonClass = 'cp-cancel-button-class';
-                    this.cpCancelButtonText = 'Cancel';
-                    this.cpFallbackColor = '#fff';
-                    this.cpHeight = '290px';
-                    this.cpAlpha = true;
+                    this.cpOptions = new color_picker_class_1.ColorPickerOptions;
                     this.created = false;
                 }
+                Object.defineProperty(ColorPickerDirective.prototype, "options", {
+                    set: function (val) {
+                        this.cpOptions = new color_picker_class_1.ColorPickerOptions();
+                        for (var key in this.cpOptions)
+                            if (key in val)
+                                this.cpOptions[key] = val[key];
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 ColorPickerDirective.prototype.ngOnInit = function () {
                     var hsva = this.service.stringToHsva(this.colorPicker);
-                    if (hsva == null) {
-                        hsva = this.service.stringToHsva(this.cpFallbackColor);
-                    }
-                    this.colorPickerChange.emit(this.service.outputFormat(hsva, this.cpOutputFormat));
+                    if (!hsva)
+                        hsva = this.service.stringToHsva(this.cpOptions.fallbackColor);
+                    this.colorPickerChange.emit(this.service.outputFormat(hsva, this.cpOptions.outputFormat));
                 };
                 ColorPickerDirective.prototype.onClick = function () {
                     var _this = this;
@@ -56,7 +59,7 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                         this.created = true;
                         this.dcl.loadNextToLocation(DialogComponent, this.vcRef)
                             .then(function (res) {
-                            res.instance.setDialog(_this, _this.el, _this.colorPicker, _this.cpPosition, _this.cpPositionOffset, _this.cpPositionRelativeToArrow, _this.cpOutputFormat, _this.cpCancelButton, _this.cpCancelButtonClass, _this.cpCancelButtonText, _this.cpHeight, _this.cpAlpha);
+                            res.instance.setDialog(_this, _this.el, _this.colorPicker, _this.cpOptions);
                             _this.dialog = res.instance;
                         });
                     }
@@ -81,45 +84,10 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                     __metadata('design:type', Object)
                 ], ColorPickerDirective.prototype, "colorPickerChange", void 0);
                 __decorate([
-                    core_1.Input('cpPosition'), 
-                    __metadata('design:type', String)
-                ], ColorPickerDirective.prototype, "cpPosition", void 0);
-                __decorate([
-                    core_1.Input('cpPositionOffset'), 
-                    __metadata('design:type', String)
-                ], ColorPickerDirective.prototype, "cpPositionOffset", void 0);
-                __decorate([
-                    core_1.Input('cpPositionRelativeToArrow'), 
-                    __metadata('design:type', Boolean)
-                ], ColorPickerDirective.prototype, "cpPositionRelativeToArrow", void 0);
-                __decorate([
-                    core_1.Input('cpOutputFormat'), 
-                    __metadata('design:type', String)
-                ], ColorPickerDirective.prototype, "cpOutputFormat", void 0);
-                __decorate([
-                    core_1.Input('cpCancelButton'), 
-                    __metadata('design:type', Boolean)
-                ], ColorPickerDirective.prototype, "cpCancelButton", void 0);
-                __decorate([
-                    core_1.Input('cpCancelButtonClass'), 
-                    __metadata('design:type', String)
-                ], ColorPickerDirective.prototype, "cpCancelButtonClass", void 0);
-                __decorate([
-                    core_1.Input('cpCancelButtonText'), 
-                    __metadata('design:type', String)
-                ], ColorPickerDirective.prototype, "cpCancelButtonText", void 0);
-                __decorate([
-                    core_1.Input('cpFallbackColor'), 
-                    __metadata('design:type', String)
-                ], ColorPickerDirective.prototype, "cpFallbackColor", void 0);
-                __decorate([
-                    core_1.Input('cpHeight'), 
-                    __metadata('design:type', String)
-                ], ColorPickerDirective.prototype, "cpHeight", void 0);
-                __decorate([
-                    core_1.Input('cpAlpha'), 
-                    __metadata('design:type', Boolean)
-                ], ColorPickerDirective.prototype, "cpAlpha", void 0);
+                    core_1.Input('options'), 
+                    __metadata('design:type', Object), 
+                    __metadata('design:paramtypes', [Object])
+                ], ColorPickerDirective.prototype, "options", null);
                 ColorPickerDirective = __decorate([
                     core_1.Directive({
                         selector: '[colorPicker]',
@@ -138,14 +106,12 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                     this.newValue = new core_1.EventEmitter();
                 }
                 TextDirective.prototype.changeInput = function (value) {
-                    if (this.rg === undefined) {
+                    if (this.rg == undefined)
                         this.newValue.emit(value);
-                    }
                     else {
                         var numeric = parseFloat(value);
-                        if (!isNaN(numeric) && numeric >= 0 && numeric <= this.rg) {
+                        if (!isNaN(numeric) && numeric >= 0 && numeric <= this.rg)
                             this.newValue.emit({ v: numeric, rg: this.rg });
-                        }
                     }
                 };
                 __decorate([
@@ -185,15 +151,12 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                     var width = this.el.nativeElement.offsetWidth;
                     var x = Math.max(0, Math.min(this.getX(event), width));
                     var y = Math.max(0, Math.min(this.getY(event), height));
-                    if (this.rgX !== undefined && this.rgY !== undefined) {
+                    if (this.rgX != undefined && this.rgY != undefined)
                         this.newValue.emit({ s: x / width, v: (1 - y / height), rgX: this.rgX, rgY: this.rgY });
-                    }
-                    else if (this.rgX === undefined && this.rgY !== undefined) {
+                    else if (this.rgX == undefined && this.rgY != undefined)
                         this.newValue.emit({ v: y / height, rg: this.rgY });
-                    }
-                    else {
+                    else
                         this.newValue.emit({ v: x / width, rg: this.rgX });
-                    }
                 };
                 SliderDirective.prototype.move = function (event) {
                     event.preventDefault();
@@ -213,10 +176,10 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                     document.removeEventListener('touchend', this.listenerStop);
                 };
                 SliderDirective.prototype.getX = function (event) {
-                    return (event.pageX !== undefined ? event.pageX : event.touches[0].pageX) - this.el.nativeElement.getBoundingClientRect().left - window.pageXOffset;
+                    return (event.pageX != undefined ? event.pageX : event.touches[0].pageX) - this.el.nativeElement.getBoundingClientRect().left - window.pageXOffset;
                 };
                 SliderDirective.prototype.getY = function (event) {
-                    return (event.pageY !== undefined ? event.pageY : event.touches[0].pageY) - this.el.nativeElement.getBoundingClientRect().top - window.pageYOffset;
+                    return (event.pageY != undefined ? event.pageY : event.touches[0].pageY) - this.el.nativeElement.getBoundingClientRect().top - window.pageYOffset;
                 };
                 __decorate([
                     core_1.Output('newValue'), 
@@ -248,28 +211,18 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
             }());
             exports_1("SliderDirective", SliderDirective);
             DialogComponent = (function () {
-                function DialogComponent(el, service) {
+                function DialogComponent(el, service, sanitizer) {
                     this.el = el;
                     this.service = service;
-                    this.dialogWidth = 232;
-                    this.dialogArrowSize = 10;
-                    this.dialogArrowOffset = 15;
+                    this.sanitizer = sanitizer;
+                    this.dialogArrowSize = 12;
+                    this.dialogArrowOffset = 18;
                 }
-                DialogComponent.prototype.setDialog = function (instance, elementRef, color, cpPosition, cpPositionOffset, cpPositionRelativeToArrow, cpOutputFormat, cpCancelButton, cpCancelButtonClass, cpCancelButtonText, cpHeight, cpAlpha) {
+                DialogComponent.prototype.setDialog = function (instance, elementRef, color, cpOptions) {
                     this.directiveInstance = instance;
                     this.initialColor = color;
                     this.directiveElementRef = elementRef;
-                    this.cpPosition = cpPosition;
-                    this.cpPositionOffset = parseInt(cpPositionOffset);
-                    if (!cpPositionRelativeToArrow) {
-                        this.dialogArrowOffset = 0;
-                    }
-                    this.cpOutputFormat = cpOutputFormat;
-                    this.cpCancelButton = cpCancelButton;
-                    this.cpCancelButtonClass = cpCancelButtonClass;
-                    this.cpCancelButtonText = cpCancelButtonText;
-                    this.cpHeight = parseInt(cpHeight);
-                    this.cpAlpha = cpAlpha && true;
+                    this.cpOptions = cpOptions;
                 };
                 DialogComponent.prototype.setInitialColor = function (color) {
                     this.initialColor = color;
@@ -277,27 +230,27 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                 DialogComponent.prototype.ngOnInit = function () {
                     var _this = this;
                     var hsva = this.service.stringToHsva(this.initialColor);
-                    if (hsva !== null) {
+                    if (hsva)
                         this.hsva = hsva;
-                    }
-                    else {
-                        this.hsva = new classes_1.Hsva(0, 1, 1, 1);
-                    }
-                    if (!this.cpAlpha)
+                    else
+                        this.hsva = new color_picker_class_1.Hsva(0, 1, 1, 1);
+                    if (!this.cpOptions.alpha)
                         this.hsva.a = 1;
-                    this.sliderDimMax = new classes_1.SliderDimension(150, 230, 130, 150);
-                    this.slider = new classes_1.SliderPosition(0, 0, 0, 0);
-                    if (this.cpOutputFormat === 'rgba') {
-                        this.format = 1;
+                    this.sliderDimMax = new color_picker_class_1.SliderDimension(150, 230, 130, 150);
+                    this.slider = new color_picker_class_1.SliderPosition('0%', '0%', '0%', '0%');
+                    switch (this.cpOptions.outputFormat) {
+                        case 'rgba':
+                            this.format = 1;
+                            break;
+                        case 'hsla':
+                            this.format = 2;
+                            break;
+                        default:
+                            this.format = 0;
+                            break;
                     }
-                    else if (this.cpOutputFormat === 'hsla') {
-                        this.format = 2;
-                    }
-                    else {
-                        this.format = 0;
-                    }
-                    this.listenerMouseDown = function (event) { _this.onMouseDown(event); };
-                    this.listenerResize = function () { _this.onResize(); };
+                    this.listenerMouseDown = function (event) { return _this.onMouseDown(event); };
+                    this.listenerResize = function () { return _this.onResize(); };
                     this.update();
                     this.openColorPicker();
                 };
@@ -326,27 +279,23 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                 DialogComponent.prototype.setDialogPosition = function () {
                     var node = this.directiveElementRef.nativeElement, position = 'static';
                     var parentNode = null;
-                    while (node !== null && node.tagName !== 'HTML') {
+                    while (node && node.tagName != 'HTML') {
                         position = window.getComputedStyle(node).getPropertyValue("position");
-                        if (position !== 'static' && parentNode === null) {
+                        if (position != 'static' && !parentNode)
                             parentNode = node;
-                        }
-                        if (position === 'fixed') {
+                        if (position == 'fixed')
                             break;
-                        }
                         node = node.parentNode;
                     }
-                    if (position !== 'fixed') {
-                        var boxDirective = this.createBox(this.directiveElementRef.nativeElement, true);
-                        if (parentNode === null) {
+                    var boxDirective = this.createBox(this.directiveElementRef.nativeElement, position != 'fixed');
+                    if (position != 'fixed') {
+                        if (!parentNode)
                             parentNode = node;
-                        }
                         var boxParent = this.createBox(parentNode, true);
                         this.top = boxDirective.top - boxParent.top;
                         this.left = boxDirective.left - boxParent.left;
                     }
                     else {
-                        var boxDirective = this.createBox(this.directiveElementRef.nativeElement, false);
                         this.top = boxDirective.top;
                         this.left = boxDirective.left;
                         this.position = 'fixed';
@@ -354,48 +303,50 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                     var rect = this.el.nativeElement.getBoundingClientRect();
                     var top = rect.top;
                     var left = rect.left;
-                    var bottom = top + this.cpHeight;
-                    var right = left + this.dialogWidth;
-                    this.actualPosition = this.cpPosition;
+                    var bottom = top + this.cpOptions.dialogHeight;
+                    var right = left + this.cpOptions.dialogWidth;
+                    this.actualPosition = this.cpOptions.position;
                     if (this.actualPosition != 'top' && this.actualPosition != 'bottom') {
-                        if (right + boxDirective.width + this.dialogArrowSize + 20 > window.innerWidth)
+                        if (right + boxDirective.width + this.dialogArrowOffset + 20 > window.innerWidth)
                             this.actualPosition = 'left';
-                        if (left - this.dialogWidth - this.dialogArrowSize - 20 < 0)
+                        if (left - this.cpOptions.dialogWidth - this.dialogArrowOffset - 20 < 0)
                             this.actualPosition = 'right';
-                        if (right + boxDirective.width + this.dialogArrowSize + 20 > window.innerWidth || left - this.dialogWidth - this.dialogArrowSize - 20 < 0)
+                        if (right + boxDirective.width + this.dialogArrowOffset + 20 > window.innerWidth || left - this.cpOptions.dialogWidth - this.dialogArrowOffset - 20 < 0)
                             this.actualPosition = 'top';
                     }
-                    if (this.actualPosition == 'top' && top - this.cpHeight - this.dialogArrowSize - 20 < 0)
+                    if (this.actualPosition == 'top' && top - this.cpOptions.dialogHeight - this.dialogArrowSize - 20 < 0)
                         this.actualPosition = 'bottom';
-                    if (this.actualPosition === 'left') {
-                        this.top += boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset;
-                        this.left -= this.dialogWidth + this.dialogArrowSize;
-                        this.arrowTop = 10;
-                        if (bottom + boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset + 20 > window.innerHeight) {
-                            var diff = bottom + boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset + 20 - window.innerHeight;
-                            this.top -= diff;
-                            this.arrowTop += diff;
-                        }
-                    }
-                    else if (this.actualPosition === 'top') {
-                        this.top -= this.cpHeight + this.dialogArrowSize;
-                        this.left += this.cpPositionOffset / 100 * boxDirective.width - this.dialogArrowOffset;
-                        this.arrowTop = this.cpHeight - 1;
-                    }
-                    else if (this.actualPosition === 'bottom') {
-                        this.top += boxDirective.height + this.dialogArrowSize;
-                        this.left += this.cpPositionOffset / 100 * boxDirective.width - this.dialogArrowOffset;
-                        this.arrowTop = -20;
-                    }
-                    else {
-                        this.top += boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset;
-                        this.left += boxDirective.width + this.dialogArrowSize;
-                        this.arrowTop = 10;
-                        if (bottom + boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset + 20 > window.innerHeight) {
-                            var diff = bottom + boxDirective.height * this.cpPositionOffset / 100 - this.dialogArrowOffset + 20 - window.innerHeight;
-                            this.top -= diff;
-                            this.arrowTop += diff;
-                        }
+                    switch (this.actualPosition) {
+                        case 'top':
+                            this.top -= this.cpOptions.dialogHeight + this.dialogArrowOffset;
+                            this.arrowTop = this.cpOptions.dialogHeight;
+                            break;
+                        case 'bottom':
+                            this.top += boxDirective.height + this.dialogArrowOffset;
+                            this.arrowTop = -2 * this.dialogArrowSize;
+                            break;
+                        case 'left':
+                            this.top -= this.dialogArrowOffset;
+                            bottom -= this.dialogArrowOffset;
+                            this.left -= this.cpOptions.dialogWidth + this.dialogArrowOffset;
+                            this.arrowTop = this.dialogArrowSize + boxDirective.height / 2;
+                            if (bottom + 20 > window.innerHeight) {
+                                var diff = bottom + 20 - window.innerHeight;
+                                this.top -= diff;
+                                this.arrowTop += diff;
+                            }
+                            break;
+                        default:
+                            this.top -= this.dialogArrowOffset;
+                            bottom -= this.dialogArrowOffset;
+                            this.left += boxDirective.width + this.dialogArrowOffset;
+                            this.arrowTop = this.dialogArrowSize + boxDirective.height / 2;
+                            if (bottom + 20 > window.innerHeight) {
+                                var diff = bottom + 20 - window.innerHeight;
+                                this.top -= diff;
+                                this.arrowTop += diff;
+                            }
+                            break;
                     }
                 };
                 DialogComponent.prototype.setSaturation = function (val) {
@@ -415,7 +366,7 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                     this.update();
                 };
                 DialogComponent.prototype.setAlpha = function (val) {
-                    this.hsva.a = this.cpAlpha ? val.v / val.rg : 1;
+                    this.hsva.a = this.cpOptions.alpha ? val.v / val.rg : 1;
                     this.update();
                 };
                 DialogComponent.prototype.setR = function (val) {
@@ -443,32 +394,29 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                 };
                 DialogComponent.prototype.setColorFromString = function (value) {
                     var hsva = this.service.stringToHsva(value);
-                    if (hsva !== null) {
+                    if (hsva)
                         this.hsva = hsva;
-                    }
                     this.update();
                 };
                 DialogComponent.prototype.formatPolicy = function () {
                     this.format = (this.format + 1) % 3;
-                    if (this.format === 0 && this.hsva.a < 1) {
+                    if (this.format == 0 && this.hsva.a < 1)
                         this.format++;
-                    }
                     return this.format;
                 };
                 DialogComponent.prototype.update = function () {
                     var hsla = this.service.hsva2hsla(this.hsva);
                     var rgba = this.service.denormalizeRGBA(this.service.hsvaToRgba(this.hsva));
-                    var hueRgba = this.service.denormalizeRGBA(this.service.hsvaToRgba(new classes_1.Hsva(this.hsva.h, 1, 1, 1)));
-                    this.hslaText = new classes_1.Hsla(Math.round((hsla.h) * 360), Math.round(hsla.s * 100), Math.round(hsla.l * 100), Math.round(hsla.a * 100) / 100);
-                    this.rgbaText = new classes_1.Rgba(rgba.r, rgba.g, rgba.b, Math.round(rgba.a * 100) / 100);
+                    var hueRgba = this.service.denormalizeRGBA(this.service.hsvaToRgba(new color_picker_class_1.Hsva(this.hsva.h, 1, 1, 1)));
+                    this.hslaText = new color_picker_class_1.Hsla(Math.round((hsla.h) * 360), Math.round(hsla.s * 100), Math.round(hsla.l * 100), Math.round(hsla.a * 100) / 100);
+                    this.rgbaText = new color_picker_class_1.Rgba(rgba.r, rgba.g, rgba.b, Math.round(rgba.a * 100) / 100);
                     this.hexText = this.service.hexText(rgba);
-                    this.alphaSliderColor = 'rgb(' + rgba.r + ',' + rgba.g + ',' + rgba.b + ')';
+                    this.alphaSliderColor = this.sanitizer.bypassSecurityTrustStyle('linear-gradient(to right, rgba(' + rgba.r + ',' + rgba.g + ',' + rgba.b + ', 0) 0%, rgba(' + rgba.r + ',' + rgba.g + ',' + rgba.b + ', 1) 100%)');
                     this.hueSliderColor = 'rgb(' + hueRgba.r + ',' + hueRgba.g + ',' + hueRgba.b + ')';
-                    if (this.format === 0 && this.hsva.a < 1) {
+                    if (this.format == 0 && this.hsva.a < 1)
                         this.format++;
-                    }
-                    this.outputColor = this.service.outputFormat(this.hsva, this.cpOutputFormat);
-                    this.slider = new classes_1.SliderPosition((this.hsva.h) * this.sliderDimMax.h - 8, this.hsva.s * this.sliderDimMax.s - 8, (1 - this.hsva.v) * this.sliderDimMax.v - 8, this.hsva.a * this.sliderDimMax.a - 8);
+                    this.outputColor = this.service.outputFormat(this.hsva, this.cpOptions.outputFormat);
+                    this.slider = new color_picker_class_1.SliderPosition(this.hsva.h * 100 + '%', this.hsva.s * 100 + '%', (1 - this.hsva.v) * 100 + '%', this.hsva.a * 100 + '%');
                     this.directiveInstance.colorChanged(this.outputColor);
                 };
                 DialogComponent.prototype.cancelColor = function () {
@@ -477,10 +425,9 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                 };
                 DialogComponent.prototype.isDescendant = function (parent, child) {
                     var node = child.parentNode;
-                    while (node !== null) {
-                        if (node === parent) {
+                    while (node) {
+                        if (node == parent)
                             return true;
-                        }
                         node = node.parentNode;
                     }
                     return false;
@@ -501,7 +448,7 @@ System.register(['@angular/core', './color-picker.service', './classes'], functi
                         styleUrls: ['color-picker.css'],
                         directives: [SliderDirective, TextDirective]
                     }), 
-                    __metadata('design:paramtypes', [core_1.ElementRef, color_picker_service_1.ColorPickerService])
+                    __metadata('design:paramtypes', [core_1.ElementRef, color_picker_service_1.ColorPickerService, platform_browser_1.DomSanitizationService])
                 ], DialogComponent);
                 return DialogComponent;
             }());

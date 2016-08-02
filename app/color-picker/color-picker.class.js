@@ -1,7 +1,7 @@
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var Hsva, Hsla, Rgba, SliderPosition, SliderDimension;
+    var Hsva, Hsla, Rgba, SliderPosition, SliderDimension, ColorPickerOptions;
     return {
         setters:[],
         execute: function() {
@@ -55,7 +55,21 @@ System.register([], function(exports_1, context_1) {
                 return SliderDimension;
             }());
             exports_1("SliderDimension", SliderDimension);
+            ColorPickerOptions = (function () {
+                function ColorPickerOptions() {
+                    this.position = 'right';
+                    this.outputFormat = 'hex';
+                    this.cancelButton = false;
+                    this.cancelButtonText = 'Cancel';
+                    this.fallbackColor = '#ffffff';
+                    this.dialogHeight = 290;
+                    this.dialogWidth = 230;
+                    this.alpha = true;
+                }
+                return ColorPickerOptions;
+            }());
+            exports_1("ColorPickerOptions", ColorPickerOptions);
         }
     }
 });
-//# sourceMappingURL=classes.js.map
+//# sourceMappingURL=color-picker.class.js.map
