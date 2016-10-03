@@ -1,7 +1,9 @@
-import { Component, DynamicComponentLoader, Directive, Input, Output, ViewContainerRef, ElementRef, EventEmitter, OnInit } from '@angular/core'
+import { Component, ComponentFactoryResolver, Directive, Input, Output, ViewContainerRef, ElementRef, EventEmitter, OnInit, NgModule } from '@angular/core'
+import { CommonModule } from '@angular/common'
 import { ColorPickerService } from './color-picker.service'
-import { DomSanitizationService, SafeStyle } from '@angular/platform-browser'
+import { DomSanitizer, SafeStyle } from '@angular/platform-browser'
 import { Rgba, Hsla, Hsva, SliderPosition, SliderDimension, ColorPickerOptions } from './color-picker.class'
+import { Compiler, ReflectiveInjector} from '@angular/core';
 
 @Directive({
     selector: '[colorPicker]',
@@ -24,7 +26,7 @@ export class ColorPickerDirective implements OnInit {
     private dialog: any
     private created: boolean
 
-    constructor(private dcl: DynamicComponentLoader, private vcRef: ViewContainerRef, private el: ElementRef, private service: ColorPickerService) {
+    constructor(private compiler: Compiler, private vcRef: ViewContainerRef, private el: ElementRef, private service: ColorPickerService) {
         this.created = false
     }
 
@@ -39,11 +41,16 @@ export class ColorPickerDirective implements OnInit {
     onClick() {
         if (!this.created) {
             this.created = true
-            this.dcl.loadNextToLocation(DialogComponent, this.vcRef)
-                .then(res => {
-                    res.instance.setDialog(this, this.el, this.colorPicker, this.cpOptions)
-                    this.dialog = res.instance
-                })
+
+            this.compiler.compileModuleAndAllComponentsAsync(DynamicCpModule)
+                .then(factory => {
+                    const compFactory = factory.componentFactories.find(x => x.componentType === DialogComponent);
+                    const injector = ReflectiveInjector.fromResolvedProviders([], this.vcRef.parentInjector);
+                    const cmpRef = this.vcRef.createComponent(compFactory, 0, injector, []);
+                    cmpRef.instance.setDialog(this, this.el, this.colorPicker, this.cpOptions);
+                    this.dialog = cmpRef.instance;
+                });
+
         } else if (this.dialog) {
             this.dialog.setInitialColor(this.colorPicker)
             this.dialog.openColorPicker()
@@ -146,14 +153,11 @@ export class SliderDirective {
     }
 }
 
-declare var __moduleName: string
-
 @Component({
-    moduleId: __moduleName,
+    moduleId: module['id'],
     selector: 'color-picker',
     templateUrl: 'color-picker.html',
     styleUrls: ['color-picker.css'],
-    directives: [SliderDirective, TextDirective]
 })
 export class DialogComponent implements OnInit {
     private hsva: Hsva
@@ -184,7 +188,7 @@ export class DialogComponent implements OnInit {
     private arrowTop: number
     private actualPosition: string
 
-    constructor(private el: ElementRef, private service: ColorPickerService, private sanitizer: DomSanitizationService) { }
+    constructor(private el: ElementRef, private service: ColorPickerService, private sanitizer: DomSanitizer) { }
 
     setDialog(instance: any, elementRef: ElementRef, color: any, cpOptions: ColorPickerOptions) {
         this.directiveInstance = instance
@@ -248,7 +252,7 @@ export class DialogComponent implements OnInit {
 
     closeColorPicker() {
         this.show = false
-        document.removeEventListener('mouseup', this.listenerMouseDown)
+        document.removeEventListener('mousedown', this.listenerMouseDown)
         window.removeEventListener('resize', this.listenerResize)
     }
 
@@ -452,3 +456,9 @@ export class DialogComponent implements OnInit {
         }
     }
 }
+
+@NgModule({
+    imports: [CommonModule],
+    declarations: [DialogComponent, TextDirective, SliderDirective]
+})
+class DynamicCpModule { };

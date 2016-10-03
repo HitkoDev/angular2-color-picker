@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core'
-import {Rgba, Hsla, Hsva} from './color-picker.class'
+import { Injectable } from '@angular/core'
+import { Rgba, Hsla, Hsva } from './color-picker.class'
 
 @Injectable()
 export class ColorPickerService {

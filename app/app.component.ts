@@ -4,7 +4,6 @@ import {ColorPickerDirective} from './color-picker/color-picker.directive'
 @Component({
     selector: 'my-app',
     templateUrl: 'app/demo.html',
-    directives: [ColorPickerDirective]
 })
 
 export class AppComponent {
