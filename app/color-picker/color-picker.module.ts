@@ -1,12 +1,20 @@
 import { NgModule } from '@angular/core'
 import { ColorPickerService } from './color-picker.service'
 import { ColorPickerDirective, TextDirective, SliderDirective, DialogComponent } from './color-picker.directive'
+
 import { CommonModule } from '@angular/common'
-import { FormsModule } from '@angular/forms'
+import { BrowserModule } from '@angular/platform-browser'
 
 @NgModule({
+    imports: [
+        BrowserModule,
+        CommonModule
+    ],
     declarations: [
-        ColorPickerDirective
+        ColorPickerDirective,
+        SliderDirective,
+        DialogComponent,
+        TextDirective
     ],
     providers: [
         ColorPickerService

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'
 import { ColorPickerService } from './color-picker.service'
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser'
 import { Rgba, Hsla, Hsva, SliderPosition, SliderDimension, ColorPickerOptions } from './color-picker.class'
-import { Compiler, ReflectiveInjector} from '@angular/core';
+import { Compiler, ReflectiveInjector } from '@angular/core';
 
 @Directive({
     selector: '[colorPicker]',
@@ -154,7 +154,7 @@ export class SliderDirective {
 }
 
 @Component({
-    moduleId: module['id'],
+    moduleId: module.id,
     selector: 'color-picker',
     templateUrl: 'color-picker.html',
     styleUrls: ['color-picker.css'],
