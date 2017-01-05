@@ -170,7 +170,7 @@ export class DialogComponent implements OnInit {
     private slider: SliderPosition
     private sliderDimMax: SliderDimension
     private format: number
-    private show: boolean
+    show: boolean
     private top: number
     private left: number
     private position: string

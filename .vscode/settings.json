@@ -11,4 +11,6 @@
             "when": "$(basename).scss"
         }
     }
+,
+"typescript.tsdk": "./node_modules/typescript/lib"
 }
