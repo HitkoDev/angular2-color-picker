@@ -21,6 +21,9 @@ import { BrowserModule } from '@angular/platform-browser'
     ],
     exports: [
         ColorPickerDirective
+    ],
+    entryComponents: [
+        DialogComponent
     ]
 })
 export class ColorPickerModule { }

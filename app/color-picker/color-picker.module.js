@@ -22,6 +22,9 @@ ColorPickerModule.decorators = [
                 ],
                 exports: [
                     ColorPickerDirective
+                ],
+                entryComponents: [
+                    DialogComponent
                 ]
             },] },
 ];

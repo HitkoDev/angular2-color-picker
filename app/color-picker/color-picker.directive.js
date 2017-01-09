@@ -1,15 +1,15 @@
-import { Component, Directive, Input, Output, ViewContainerRef, ElementRef, EventEmitter, NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ComponentFactoryResolver, Directive, Input, Output, ViewContainerRef, ElementRef, EventEmitter } from '@angular/core';
 import { ColorPickerService } from './color-picker.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Rgba, Hsla, Hsva, SliderPosition, SliderDimension, ColorPickerOptions } from './color-picker.class';
-import { Compiler, ReflectiveInjector } from '@angular/core';
+import { Compiler } from '@angular/core';
 export class ColorPickerDirective {
-    constructor(compiler, vcRef, el, service) {
+    constructor(compiler, vcRef, el, service, resolver) {
         this.compiler = compiler;
         this.vcRef = vcRef;
         this.el = el;
         this.service = service;
+        this.resolver = resolver;
         this.colorPickerChange = new EventEmitter();
         this.cpOptions = new ColorPickerOptions;
         this.created = false;
@@ -29,14 +29,9 @@ export class ColorPickerDirective {
     onClick() {
         if (!this.created) {
             this.created = true;
-            this.compiler.compileModuleAndAllComponentsAsync(DynamicCpModule)
-                .then(factory => {
-                const compFactory = factory.componentFactories.find(x => x.componentType === DialogComponent);
-                const injector = ReflectiveInjector.fromResolvedProviders([], this.vcRef.parentInjector);
-                const cmpRef = this.vcRef.createComponent(compFactory, 0, injector, []);
-                cmpRef.instance.setDialog(this, this.el, this.colorPicker, this.cpOptions);
-                this.dialog = cmpRef.instance;
-            });
+            let factory = this.resolver.resolveComponentFactory(DialogComponent);
+            this.dialog = this.vcRef.createComponent(factory).instance;
+            this.dialog.setDialog(this, this.el, this.colorPicker, this.cpOptions);
         }
         else if (this.dialog) {
             this.dialog.setInitialColor(this.colorPicker);
@@ -66,6 +61,7 @@ ColorPickerDirective.ctorParameters = () => [
     { type: ViewContainerRef, },
     { type: ElementRef, },
     { type: ColorPickerService, },
+    { type: ComponentFactoryResolver, },
 ];
 ColorPickerDirective.propDecorators = {
     'colorPicker': [{ type: Input, args: ['colorPicker',] },],
@@ -407,15 +403,4 @@ DialogComponent.ctorParameters = () => [
     { type: ColorPickerService, },
     { type: DomSanitizer, },
 ];
-class DynamicCpModule {
-}
-DynamicCpModule.decorators = [
-    { type: NgModule, args: [{
-                imports: [CommonModule],
-                declarations: [DialogComponent, TextDirective, SliderDirective]
-            },] },
-];
-/** @nocollapse */
-DynamicCpModule.ctorParameters = () => [];
-;
 //# sourceMappingURL=color-picker.directive.js.map

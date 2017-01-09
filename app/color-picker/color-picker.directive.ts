@@ -23,10 +23,10 @@ export class ColorPickerDirective implements OnInit {
                 this.cpOptions[key] = val[key]
     }
 
-    private dialog: any
+    private dialog: DialogComponent
     private created: boolean
 
-    constructor(private compiler: Compiler, private vcRef: ViewContainerRef, private el: ElementRef, private service: ColorPickerService) {
+    constructor(private compiler: Compiler, private vcRef: ViewContainerRef, private el: ElementRef, private service: ColorPickerService, private resolver: ComponentFactoryResolver) {
         this.created = false
     }
 
@@ -42,14 +42,9 @@ export class ColorPickerDirective implements OnInit {
         if (!this.created) {
             this.created = true
 
-            this.compiler.compileModuleAndAllComponentsAsync(DynamicCpModule)
-                .then(factory => {
-                    const compFactory = factory.componentFactories.find(x => x.componentType === DialogComponent);
-                    const injector = ReflectiveInjector.fromResolvedProviders([], this.vcRef.parentInjector);
-                    const cmpRef = this.vcRef.createComponent(compFactory, 0, injector, []);
-                    cmpRef.instance.setDialog(this, this.el, this.colorPicker, this.cpOptions);
-                    this.dialog = cmpRef.instance;
-                });
+            let factory = this.resolver.resolveComponentFactory(DialogComponent)
+            this.dialog = this.vcRef.createComponent(factory).instance
+            this.dialog.setDialog(this, this.el, this.colorPicker, this.cpOptions)
 
         } else if (this.dialog) {
             this.dialog.setInitialColor(this.colorPicker)
@@ -456,9 +451,3 @@ export class DialogComponent implements OnInit {
         }
     }
 }
-
-@NgModule({
-    imports: [CommonModule],
-    declarations: [DialogComponent, TextDirective, SliderDirective]
-})
-class DynamicCpModule { };
