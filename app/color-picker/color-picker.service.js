@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Rgba, Hsla, Hsva } from './color-picker.class';
 export class ColorPickerService {
-    constructor() {
-    }
+    constructor() { }
     hsla2hsva(hsla) {
         var h = Math.min(hsla.h, 1), s = Math.min(hsla.s, 1), l = Math.min(hsla.l, 1), a = Math.min(hsla.a, 1);
         if (l == 0)

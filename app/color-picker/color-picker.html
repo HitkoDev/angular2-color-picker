@@ -29,7 +29,7 @@
         <button *ngIf="cpOptions.cancelButton" type="button" (click)="cancelColor()">{{cpOptions.cancelButtonText}}</button>
     </div>
     <div class="input-wrap">
-        <div [hidden]="format!=2" class="hsla-text">
+        <div *ngIf="format==2" class="hsla-text">
             <div class="flex-wrap">
                 <div>
                     <input [text] type="number" pattern="[0-9]*" min="0" max="360" [rg]="360" (newValue)="setHue($event)" [value]="hslaText.h"
@@ -54,7 +54,7 @@
             </div>
         </div>
 
-        <div [hidden]="format!=1" class="rgba-text">
+        <div *ngIf="format==1" class="rgba-text">
             <div class="flex-wrap">
                 <div>
                     <input [text] type="number" pattern="[0-9]*" min="0" max="255" [rg]="255" (newValue)="setR($event)" [value]="rgbaText.r"
@@ -79,7 +79,7 @@
             </div>
         </div>
 
-        <div [hidden]="format!=0" class="hex-text">
+        <div *ngIf="format==0" class="hex-text">
             <div class="flex-wrap">
                 <div>
                     <input [text] (newValue)="setColorFromString($event)" [value]="hexText" />
