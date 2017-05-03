@@ -24,7 +24,11 @@ export class ColorPickerDirective {
         var hsva = this.service.stringToHsva(this.colorPicker);
         if (!hsva)
             hsva = this.service.stringToHsva(this.cpOptions.fallbackColor);
-        this.colorPickerChange.emit(this.service.outputFormat(hsva, this.cpOptions.outputFormat));
+        let value = this.service.outputFormat(hsva, this.cpOptions.outputFormat);
+        if (value != this._val) {
+            this._val = value;
+            this.colorPickerChange.emit(value);
+        }
     }
     onClick() {
         if (!this.created) {
@@ -39,11 +43,17 @@ export class ColorPickerDirective {
         }
     }
     colorChanged(value) {
-        this.colorPickerChange.emit(value);
+        if (value != this._val) {
+            this._val = value;
+            this.colorPickerChange.emit(value);
+        }
     }
     changeInput(value) {
-        this.dialog.setColorFromString(value);
-        this.colorPickerChange.emit(value);
+        if (value != this._val) {
+            this._val = value;
+            this.dialog.setColorFromString(value);
+            this.colorPickerChange.emit(value);
+        }
     }
 }
 ColorPickerDirective.decorators = [

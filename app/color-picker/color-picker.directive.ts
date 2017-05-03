@@ -26,6 +26,8 @@ export class ColorPickerDirective implements OnInit {
     private dialog: DialogComponent
     private created: boolean
 
+    private _val: string
+
     constructor(private compiler: Compiler, private vcRef: ViewContainerRef, private el: ElementRef, private service: ColorPickerService, private resolver: ComponentFactoryResolver) {
         this.created = false
     }
@@ -35,7 +37,11 @@ export class ColorPickerDirective implements OnInit {
         if (!hsva)
             hsva = this.service.stringToHsva(this.cpOptions.fallbackColor)
 
-        this.colorPickerChange.emit(this.service.outputFormat(hsva, this.cpOptions.outputFormat))
+        let value = this.service.outputFormat(hsva, this.cpOptions.outputFormat)
+        if (value != this._val) {
+            this._val = value
+            this.colorPickerChange.emit(value)
+        }
     }
 
     onClick() {
@@ -53,12 +59,18 @@ export class ColorPickerDirective implements OnInit {
     }
 
     colorChanged(value: string) {
-        this.colorPickerChange.emit(value)
+        if (value != this._val) {
+            this._val = value
+            this.colorPickerChange.emit(value)
+        }
     }
 
     changeInput(value: string) {
-        this.dialog.setColorFromString(value)
-        this.colorPickerChange.emit(value)
+        if (value != this._val) {
+            this._val = value
+            this.dialog.setColorFromString(value)
+            this.colorPickerChange.emit(value)
+        }
     }
 }
 
