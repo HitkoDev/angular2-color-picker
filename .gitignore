@@ -7,3 +7,4 @@ app/.sass-cache/
 create-dist.bat
 .sass-cache/*
 ngfactory
+package-lock.json
